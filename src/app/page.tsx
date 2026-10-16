@@ -1,0 +1,83 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { Sidebar } from '../components/Sidebar';
+import { Header } from '../components/Header';
+import { LoginPage } from '../components/LoginPage';
+import { DashboardView } from '../components/DashboardView';
+import { StudentsView } from '../components/StudentsView';
+import { ClassesView } from '../components/ClassesView';
+import { TeachersView } from '../components/TeachersView';
+import { AttendanceView } from '../components/AttendanceView';
+import { SchedulesView } from '../components/SchedulesView';
+import { PaymentsView } from '../components/PaymentsView';
+import { SupabaseModal } from '../components/SupabaseModal';
+import { ToastContainer } from '../components/Toast';
+
+export default function Home() {
+  const { currentUser, activeTab, setActiveTab } = useApp();
+
+  const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+
+  // If user is not authenticated, show modern Ruang Belajarku login page
+  if (!currentUser) {
+    return (
+      <>
+        <LoginPage onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)} />
+        <SupabaseModal
+          isOpen={isSupabaseModalOpen}
+          onClose={() => setIsSupabaseModalOpen(false)}
+        />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  return (
+    <div className="app-shell">
+      {/* Sidebar with Official Logo */}
+      <Sidebar
+        isOpen={isSidebarOpenMobile}
+        onCloseMobile={() => setIsSidebarOpenMobile(false)}
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+      />
+
+      {/* Main Content Area */}
+      <div className="main-content-wrapper">
+        <Header
+          onToggleSidebarMobile={() => setIsSidebarOpenMobile(!isSidebarOpenMobile)}
+          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+          onOpenQuickAddStudent={() => setActiveTab('students')}
+          onOpenQuickAddPayment={() => setActiveTab('payments')}
+          onOpenQuickAddClass={() => setActiveTab('classes')}
+        />
+
+        <main className="content-area">
+          {activeTab === 'dashboard' && (
+            <DashboardView
+              onOpenAddStudent={() => setActiveTab('students')}
+              onOpenAddPayment={() => setActiveTab('payments')}
+            />
+          )}
+          {activeTab === 'students' && <StudentsView />}
+          {activeTab === 'classes' && <ClassesView />}
+          {activeTab === 'teachers' && <TeachersView />}
+          {activeTab === 'attendance' && <AttendanceView />}
+          {activeTab === 'schedules' && <SchedulesView />}
+          {activeTab === 'payments' && <PaymentsView />}
+        </main>
+      </div>
+
+      {/* Supabase Connection Setup Modal */}
+      <SupabaseModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
+      />
+
+      {/* Interactive Toast Notifications */}
+      <ToastContainer />
+    </div>
+  );
+}
