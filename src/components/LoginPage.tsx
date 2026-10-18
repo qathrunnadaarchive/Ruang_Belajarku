@@ -15,11 +15,7 @@ import {
   Building,
 } from 'lucide-react';
 
-interface LoginPageProps {
-  onOpenSupabaseModal: () => void;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => {
+export const LoginPage: React.FC = () => {
   const { loginWithSupabase, isSupabaseConnected } = useApp();
 
   const [email, setEmail] = useState('');
@@ -355,7 +351,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
               border: '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#94a3b8' }}>
@@ -367,21 +362,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
                 </strong>
               </span>
             </div>
-            <button
-              type="button"
-              onClick={onOpenSupabaseModal}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#38bdf8',
-                fontSize: 11.5,
-                fontWeight: 600,
-                cursor: 'pointer',
-                textDecoration: 'underline',
-              }}
-            >
-              Atur Supabase
-            </button>
           </div>
         </div>
       </div>

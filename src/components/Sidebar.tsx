@@ -10,23 +10,19 @@ import {
   CalendarCheck,
   Clock,
   CreditCard,
-  Database,
   LogOut,
   Sparkles,
-  ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
   onCloseMobile?: () => void;
-  onOpenSupabaseModal: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onCloseMobile,
-  onOpenSupabaseModal,
 }) => {
   const {
     activeTab,
@@ -192,26 +188,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {isSupabaseConnected ? 'Supabase Terhubung' : 'Penyimpanan Lokal Aktif'}
               </span>
             </div>
-            <button
-              onClick={onOpenSupabaseModal}
-              title="Pengaturan Database Supabase"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: 'none',
-                color: '#fdba74',
-                fontSize: 10.5,
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: 4,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              <Database size={11} />
-              DB
-            </button>
           </div>
         </div>
 
@@ -312,52 +288,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             );
           })}
-
-          <div
-            style={{
-              fontSize: 10.5,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              fontWeight: 700,
-              color: '#64748b',
-              padding: '18px 10px 6px',
-            }}
-          >
-            Integrasi & Sistem
-          </div>
-
-          <button
-            onClick={onOpenSupabaseModal}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 255, 255, 0.04)',
-              color: '#94a3b8',
-              fontSize: 13,
-              textAlign: 'left',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.color = '#ffffff';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
-              e.currentTarget.style.color = '#94a3b8';
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-              <Database size={17} color="#38bdf8" />
-              <span>Koneksi Supabase</span>
-            </div>
-            <ChevronRight size={15} />
-          </button>
         </div>
 
         {/* User Card & Logout */}

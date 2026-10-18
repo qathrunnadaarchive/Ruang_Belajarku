@@ -20,7 +20,6 @@ import {
 
 interface HeaderProps {
   onToggleSidebarMobile: () => void;
-  onOpenSupabaseModal: () => void;
   onOpenQuickAddStudent: () => void;
   onOpenQuickAddPayment: () => void;
   onOpenQuickAddClass: () => void;
@@ -28,7 +27,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onToggleSidebarMobile,
-  onOpenSupabaseModal,
   onOpenQuickAddStudent,
   onOpenQuickAddPayment,
   onOpenQuickAddClass,
@@ -156,8 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Supabase Status Pill & Sync Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button
-            onClick={onOpenSupabaseModal}
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -171,10 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
               fontSize: 12,
               fontWeight: 700,
               color: isSupabaseConnected ? '#065f46' : '#92400e',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
             }}
-            title="Klik untuk konfigurasi koneksi Supabase"
           >
             <Database size={13} color={isSupabaseConnected ? '#059669' : '#d97706'} />
             <span>{isSupabaseConnected ? 'Supabase Terhubung' : 'Penyimpanan Lokal'}</span>
@@ -183,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
                 • {lastSyncTime}
               </span>
             )}
-          </button>
+          </div>
 
           <button
             onClick={() => refreshFromSupabase()}

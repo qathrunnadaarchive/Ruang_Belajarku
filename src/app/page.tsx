@@ -12,14 +12,12 @@ import { TeachersView } from '../components/TeachersView';
 import { AttendanceView } from '../components/AttendanceView';
 import { SchedulesView } from '../components/SchedulesView';
 import { PaymentsView } from '../components/PaymentsView';
-import { SupabaseModal } from '../components/SupabaseModal';
 import { ToastContainer } from '../components/Toast';
 
 export default function Home() {
   const { currentUser, isAuthLoading, activeTab, setActiveTab } = useApp();
 
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
   // Indikator memuat saat sesi Supabase sedang diverifikasi
   if (isAuthLoading) {
@@ -63,11 +61,7 @@ export default function Home() {
   if (!currentUser) {
     return (
       <>
-        <LoginPage onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)} />
-        <SupabaseModal
-          isOpen={isSupabaseModalOpen}
-          onClose={() => setIsSupabaseModalOpen(false)}
-        />
+        <LoginPage />
         <ToastContainer />
       </>
     );
@@ -79,14 +73,12 @@ export default function Home() {
       <Sidebar
         isOpen={isSidebarOpenMobile}
         onCloseMobile={() => setIsSidebarOpenMobile(false)}
-        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
       />
 
       {/* Main Content Area */}
       <div className="main-content-wrapper">
         <Header
           onToggleSidebarMobile={() => setIsSidebarOpenMobile(!isSidebarOpenMobile)}
-          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
           onOpenQuickAddStudent={() => setActiveTab('students')}
           onOpenQuickAddPayment={() => setActiveTab('payments')}
           onOpenQuickAddClass={() => setActiveTab('classes')}
@@ -107,12 +99,6 @@ export default function Home() {
           {activeTab === 'payments' && <PaymentsView />}
         </main>
       </div>
-
-      {/* Supabase Connection Setup Modal */}
-      <SupabaseModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
-      />
 
       {/* Interactive Toast Notifications */}
       <ToastContainer />
