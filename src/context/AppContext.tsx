@@ -362,7 +362,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const client = getSupabaseClient();
           client.removeChannel(channel);
-        } catch (e) {}
+        } catch (e) { }
       }
     };
   }, []);
@@ -411,7 +411,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .maybeSingle();
 
       if (profileError || !profile || !profile.role) {
-        await client.auth.signOut().catch(() => {});
+        await client.auth.signOut().catch(() => { });
         const errorMessage = profileError
           ? `Gagal memuat profil: ${profileError.message}`
           : 'Profil akun atau role tidak ditemukan di sistem. Silakan hubungi administrator.';
@@ -449,7 +449,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('rb_user');
     const client = getSupabaseClient();
     if (client) {
-      client.auth.signOut().catch(() => {});
+      client.auth.signOut().catch(() => { });
     }
     addToast({
       type: 'info',

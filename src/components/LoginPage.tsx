@@ -20,7 +20,7 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => {
-  const { loginWithSupabase, loginAsDemo, isSupabaseConnected } = useApp();
+  const { loginWithSupabase, isSupabaseConnected } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -243,122 +243,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
             </div>
           )}
 
-          {/* Quick Demo Logins */}
-          <div style={{ marginBottom: 24 }}>
-            <div
-              style={{
-                fontSize: 11,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                fontWeight: 700,
-                color: '#fb923c',
-                marginBottom: 10,
-              }}
-            >
-              Masuk Cepat 1-Klik (Mode Demo / Pengujian):
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => loginAsDemo('admin')}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.07)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: 8,
-                  padding: '10px 8px',
-                  color: '#ffffff',
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(245, 124, 0, 0.2)';
-                  e.currentTarget.style.borderColor = '#f57c00';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ fontSize: 16, marginBottom: 2 }}>👨‍💼</div>
-                <div>Admin Utama</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => loginAsDemo('pengajar')}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.07)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: 8,
-                  padding: '10px 8px',
-                  color: '#ffffff',
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(50, 112, 191, 0.25)';
-                  e.currentTarget.style.borderColor = '#38bdf8';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ fontSize: 16, marginBottom: 2 }}>👩‍🏫</div>
-                <div>Tentor/Guru</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => loginAsDemo('keuangan')}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.07)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: 8,
-                  padding: '10px 8px',
-                  color: '#ffffff',
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
-                  e.currentTarget.style.borderColor = '#10b981';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                <div style={{ fontSize: 16, marginBottom: 2 }}>💳</div>
-                <div>Staf Kasir</div>
-              </button>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              margin: '20px 0',
-              color: '#64748b',
-              fontSize: 12,
-            }}
-          >
-            <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
-            <span>atau masuk dengan email</span>
-            <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
-          </div>
-
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
@@ -378,7 +262,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
                 />
                 <input
                   type="email"
-                  placeholder="admin@ruangbelajarku.com"
+                  placeholder="nama@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
