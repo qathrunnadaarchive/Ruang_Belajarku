@@ -17,8 +17,6 @@ import {
   INITIAL_SCHEDULES,
   INITIAL_ATTENDANCES,
   INITIAL_PAYMENTS,
-  INITIAL_USER,
-  DEMO_USERS,
 } from '../lib/mockData';
 import {
   getSupabaseClient,
@@ -38,9 +36,9 @@ export interface ToastMessage {
 interface AppContextType {
   currentUser: UserProfile | null;
   setCurrentUser: (user: UserProfile | null) => void;
-  loginAsDemo: (role: 'admin' | 'pengajar' | 'keuangan') => void;
   loginWithSupabase: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  isAuthLoading: boolean;
 
   students: Student[];
   teachers: Teacher[];
@@ -121,7 +119,8 @@ const formatTimeForDb = (timeStr?: string): string => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(INITIAL_USER);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [globalSearch, setGlobalSearch] = useState<string>('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -324,38 +323,83 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Initial load and Realtime listener
+  // Initial load, Session Check, and Realtime listener
   useEffect(() => {
     let channel: any = null;
-    try {
-      const cfg = getSupabaseConfig();
-      setIsSupabaseConnected(cfg.isConfigured);
-      setSupabaseConfigState({ url: cfg.url, anonKey: cfg.anonKey });
+    let authListener: any = null;
 
-      const savedUser = localStorage.getItem('rb_user');
-      if (savedUser) setCurrentUser(JSON.parse(savedUser));
+    const checkSessionAndInit = async () => {
+      try {
+        const cfg = getSupabaseConfig();
+        setIsSupabaseConnected(cfg.isConfigured);
+        setSupabaseConfigState({ url: cfg.url, anonKey: cfg.anonKey });
 
-      // Always fetch directly from Supabase
-      refreshFromSupabase();
-
-      // Setup Realtime synchronization
-      if (typeof window !== 'undefined') {
         const client = getSupabaseClient();
-        channel = client
-          .channel('schema-db-changes')
-          .on(
-            'postgres_changes',
-            { event: '*', schema: 'public' },
-            (payload) => {
-              console.log('Realtime change from Supabase:', payload.eventType, payload.table);
-              refreshFromSupabase();
-            }
-          )
-          .subscribe();
+
+        // 1. Cek sesi aktif dengan Supabase Auth (tidak percaya rb_user di localStorage)
+        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+        const session = sessionData?.session;
+
+        if (session?.user && !sessionError) {
+          const { data: profile, error: profileError } = await client
+            .from('profiles')
+            .select('full_name, role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profile && profile.role && !profileError) {
+            const userObj: UserProfile = {
+              id: session.user.id,
+              email: session.user.email || '',
+              fullName: profile.full_name || session.user.email?.split('@')[0] || 'Pengguna',
+              role: profile.role as 'admin' | 'pengajar' | 'keuangan',
+            };
+            setCurrentUser(userObj);
+          } else {
+            await client.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            localStorage.removeItem('rb_user');
+          }
+        } else {
+          setCurrentUser(null);
+          localStorage.removeItem('rb_user');
+        }
+
+        // Listener jika terjadi logout atau sesi kedaluwarsa
+        const { data: authSub } = client.auth.onAuthStateChange((event, currentSession) => {
+          if (event === 'SIGNED_OUT' || !currentSession) {
+            setCurrentUser(null);
+            localStorage.removeItem('rb_user');
+          }
+        });
+        authListener = authSub?.subscription;
+
+        // Fetch data aplikasi dari Supabase
+        refreshFromSupabase();
+
+        // Setup Realtime synchronization
+        if (typeof window !== 'undefined') {
+          channel = client
+            .channel('schema-db-changes')
+            .on(
+              'postgres_changes',
+              { event: '*', schema: 'public' },
+              (payload) => {
+                console.log('Realtime change from Supabase:', payload.eventType, payload.table);
+                refreshFromSupabase();
+              }
+            )
+            .subscribe();
+        }
+      } catch (e) {
+        console.error('Error in initial session check:', e);
+        setCurrentUser(null);
+      } finally {
+        setIsAuthLoading(false);
       }
-    } catch (e) {
-      console.error('Error in initial load:', e);
-    }
+    };
+
+    checkSessionAndInit();
 
     return () => {
       if (channel) {
@@ -363,6 +407,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const client = getSupabaseClient();
           client.removeChannel(channel);
         } catch (e) { }
+      }
+      if (authListener) {
+        authListener.unsubscribe();
       }
     };
   }, []);
@@ -382,16 +429,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [students, teachers, classes, schedules, attendances, payments]);
 
   // Auth
-  const loginAsDemo = (role: 'admin' | 'pengajar' | 'keuangan') => {
-    const user = DEMO_USERS.find((u) => u.role === role) || INITIAL_USER;
-    setCurrentUser(user);
-    localStorage.setItem('rb_user', JSON.stringify(user));
-    addToast({
-      type: 'success',
-      title: 'Selamat Datang!',
-      message: `Masuk sebagai ${user.fullName} (${user.role.toUpperCase()})`,
-    });
-  };
 
   const loginWithSupabase = async (email: string, password: string) => {
     const client = getSupabaseClient();
@@ -444,12 +481,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setCurrentUser(null);
     localStorage.removeItem('rb_user');
     const client = getSupabaseClient();
     if (client) {
-      client.auth.signOut().catch(() => { });
+      await client.auth.signOut().catch(() => { });
     }
     addToast({
       type: 'info',
@@ -1243,9 +1280,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         currentUser,
         setCurrentUser,
-        loginAsDemo,
         loginWithSupabase,
         logout,
+        isAuthLoading,
         students,
         teachers,
         classes,
