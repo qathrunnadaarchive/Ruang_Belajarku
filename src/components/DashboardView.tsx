@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import {
   Users,
   BookOpen,
@@ -138,22 +139,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            onClick={onOpenAddStudent}
-            className="rb-btn rb-btn-orange"
-            style={{ padding: '10px 18px', fontSize: 13.5 }}
-          >
-            <Users size={16} />
-            <span>Daftar Siswa Baru</span>
-          </button>
-          <button
-            onClick={onOpenAddPayment}
-            className="rb-btn rb-btn-secondary"
-            style={{ padding: '10px 18px', fontSize: 13.5, backgroundColor: 'rgba(255,255,255,0.12)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.25)' }}
-          >
-            <CreditCard size={16} />
-            <span>Catat Pembayaran</span>
-          </button>
+          {canAccess(currentUser?.role, 'students.create') && (
+            <button
+              onClick={onOpenAddStudent}
+              className="rb-btn rb-btn-orange"
+              style={{ padding: '10px 18px', fontSize: 13.5 }}
+            >
+              <Users size={16} />
+              <span>Daftar Siswa Baru</span>
+            </button>
+          )}
+          {canAccess(currentUser?.role, 'payments.create') && (
+            <button
+              onClick={onOpenAddPayment}
+              className="rb-btn rb-btn-secondary"
+              style={{ padding: '10px 18px', fontSize: 13.5, backgroundColor: 'rgba(255,255,255,0.12)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.25)' }}
+            >
+              <CreditCard size={16} />
+              <span>Catat Pembayaran</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -233,24 +238,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Keuangan */}
-        <div
-          className="kpi-card kpi-revenue"
-          onClick={() => setActiveTab('payments')}
-          style={{ cursor: 'pointer' }}
-        >
-          <div>
-            <div className="kpi-label">Pemasukan Terkumpul</div>
-            <div className="kpi-value" style={{ fontSize: 20 }}>
-              Rp {totalRevenue.toLocaleString('id-ID')}
+        {canAccess(currentUser?.role, 'payments.view_revenue') && (
+          <div
+            className="kpi-card kpi-revenue"
+            onClick={() => setActiveTab('payments')}
+            style={{ cursor: 'pointer' }}
+          >
+            <div>
+              <div className="kpi-label">Pemasukan Terkumpul</div>
+              <div className="kpi-value" style={{ fontSize: 20 }}>
+                Rp {totalRevenue.toLocaleString('id-ID')}
+              </div>
+              <div style={{ fontSize: 12, color: pendingAmount > 0 ? 'var(--rose-600)' : 'var(--slate-500)', fontWeight: 600, marginTop: 4 }}>
+                {pendingPayments.length} Tagihan Menunggu
+              </div>
             </div>
-            <div style={{ fontSize: 12, color: pendingAmount > 0 ? 'var(--rose-600)' : 'var(--slate-500)', fontWeight: 600, marginTop: 4 }}>
-              {pendingPayments.length} Tagihan Menunggu
+            <div className="kpi-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+              <CreditCard size={24} />
             </div>
           </div>
-          <div className="kpi-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
-            <CreditCard size={24} />
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Main Grid: Jadwal Hari Ini & Analitik */}
@@ -462,65 +469,67 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Pembayaran Terbaru */}
-        <div className="rb-card">
-          <div className="rb-card-header">
-            <div className="rb-card-title">
-              <CreditCard size={17} color="var(--emerald-600)" />
-              <span>Catatan Pembayaran Terkini</span>
+        {canAccess(currentUser?.role, 'payments.view_revenue') && (
+          <div className="rb-card">
+            <div className="rb-card-header">
+              <div className="rb-card-title">
+                <CreditCard size={17} color="var(--emerald-600)" />
+                <span>Catatan Pembayaran Terkini</span>
+              </div>
+              <button
+                onClick={() => setActiveTab('payments')}
+                className="rb-btn rb-btn-secondary rb-btn-sm"
+              >
+                Kelola SPP
+              </button>
             </div>
-            <button
-              onClick={() => setActiveTab('payments')}
-              className="rb-btn rb-btn-secondary rb-btn-sm"
-            >
-              Kelola SPP
-            </button>
-          </div>
-          <div className="rb-card-body" style={{ padding: 0 }}>
-            <div className="table-container" style={{ border: 'none' }}>
-              <table className="rb-table">
-                <thead>
-                  <tr>
-                    <th>Invoice</th>
-                    <th>Siswa</th>
-                    <th>Nominal</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.slice(0, 5).map((pay) => (
-                    <tr key={pay.id}>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--navy-800)' }}>
-                          {pay.nomorTransaksi}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>
-                          {pay.jenisPembayaran}
-                        </div>
-                      </td>
-                      <td style={{ fontWeight: 500 }}>{pay.studentName}</td>
-                      <td style={{ fontWeight: 700, color: 'var(--navy-900)' }}>
-                        Rp {pay.jumlahBiaya.toLocaleString('id-ID')}
-                      </td>
-                      <td>
-                        <span
-                          className={`rb-badge ${
-                            pay.status === 'Lunas'
-                              ? 'badge-lunas'
-                              : pay.status === 'Menunggu Konfirmasi'
-                              ? 'badge-menunggu'
-                              : 'badge-belum-lunas'
-                          }`}
-                        >
-                          {pay.status}
-                        </span>
-                      </td>
+            <div className="rb-card-body" style={{ padding: 0 }}>
+              <div className="table-container" style={{ border: 'none' }}>
+                <table className="rb-table">
+                  <thead>
+                    <tr>
+                      <th>Invoice</th>
+                      <th>Siswa</th>
+                      <th>Nominal</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {payments.slice(0, 5).map((pay) => (
+                      <tr key={pay.id}>
+                        <td>
+                          <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--navy-800)' }}>
+                            {pay.nomorTransaksi}
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>
+                            {pay.jenisPembayaran}
+                          </div>
+                        </td>
+                        <td style={{ fontWeight: 500 }}>{pay.studentName}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--navy-900)' }}>
+                          Rp {pay.jumlahBiaya.toLocaleString('id-ID')}
+                        </td>
+                        <td>
+                          <span
+                            className={`rb-badge ${
+                              pay.status === 'Lunas'
+                                ? 'badge-lunas'
+                                : pay.status === 'Menunggu Konfirmasi'
+                                ? 'badge-menunggu'
+                                : 'badge-belum-lunas'
+                            }`}
+                          >
+                            {pay.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

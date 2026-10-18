@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import { ClassItem, Jenjang, ProgramType } from '../types';
 import {
   BookOpen,
@@ -32,6 +33,7 @@ export const ClassesView: React.FC = () => {
     enrollStudentInClass,
     removeStudentFromClass,
     globalSearch,
+    currentUser,
   } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -130,10 +132,12 @@ export const ClassesView: React.FC = () => {
           </p>
         </div>
 
-        <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
-          <Plus size={16} />
-          <span>Buka Kelas Baru</span>
-        </button>
+        {canAccess(currentUser?.role, 'classes.create') && (
+          <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
+            <Plus size={16} />
+            <span>Buka Kelas Baru</span>
+          </button>
+        )}
       </div>
 
       {/* Filter and Search Bar */}
@@ -216,22 +220,26 @@ export const ClassesView: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: 4 }}>
-                  <button
-                    onClick={() => handleOpenEdit(cls)}
-                    className="rb-btn-icon rb-btn-secondary"
-                    style={{ width: 30, height: 30 }}
-                    title="Edit Kelas"
-                  >
-                    <Edit2 size={14} color="var(--orange-500)" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingClass(cls)}
-                    className="rb-btn-icon rb-btn-danger"
-                    style={{ width: 30, height: 30 }}
-                    title="Hapus Kelas"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {canAccess(currentUser?.role, 'classes.edit') && (
+                    <button
+                      onClick={() => handleOpenEdit(cls)}
+                      className="rb-btn-icon rb-btn-secondary"
+                      style={{ width: 30, height: 30 }}
+                      title="Edit Kelas"
+                    >
+                      <Edit2 size={14} color="var(--orange-500)" />
+                    </button>
+                  )}
+                  {canAccess(currentUser?.role, 'classes.delete') && (
+                    <button
+                      onClick={() => setDeletingClass(cls)}
+                      className="rb-btn-icon rb-btn-danger"
+                      style={{ width: 30, height: 30 }}
+                      title="Hapus Kelas"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -473,54 +481,56 @@ export const ClassesView: React.FC = () => {
             </div>
 
             <div className="modal-body" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
-              {/* Tambah siswa ke kelas */}
-              <div
-                style={{
-                  padding: 14,
-                  backgroundColor: 'var(--slate-50)',
-                  borderRadius: 10,
-                  border: '1px solid var(--border-subtle)',
-                  marginBottom: 16,
-                }}
-              >
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy-900)', marginBottom: 8 }}>
-                  Tambahkan Siswa ke Kelas Ini:
+              {/* Tambah siswa ke kelas (Admin only) */}
+              {canAccess(currentUser?.role, 'classes.manage_students') && (
+                <div
+                  style={{
+                    padding: 14,
+                    backgroundColor: 'var(--slate-50)',
+                    borderRadius: 10,
+                    border: '1px solid var(--border-subtle)',
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy-900)', marginBottom: 8 }}>
+                    Tambahkan Siswa ke Kelas Ini:
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <select
+                      id="select-add-student"
+                      className="form-select"
+                      style={{ fontSize: 13 }}
+                    >
+                      <option value="">Pilih siswa yang belum terdaftar...</option>
+                      {students
+                        .filter((s) => !managingClass.enrolledStudentIds.includes(s.id))
+                        .map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.namaLengkap} ({s.jenjang} - {s.asalSekolah})
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const sel = document.getElementById('select-add-student') as HTMLSelectElement;
+                        if (sel && sel.value) {
+                          enrollStudentInClass(managingClass.id, sel.value);
+                          setManagingClass({
+                            ...managingClass,
+                            enrolledStudentIds: [...managingClass.enrolledStudentIds, sel.value],
+                          });
+                          sel.value = '';
+                        }
+                      }}
+                      className="rb-btn rb-btn-orange rb-btn-sm"
+                    >
+                      <UserPlus size={15} />
+                      <span>Daftarkan</span>
+                    </button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <select
-                    id="select-add-student"
-                    className="form-select"
-                    style={{ fontSize: 13 }}
-                  >
-                    <option value="">Pilih siswa yang belum terdaftar...</option>
-                    {students
-                      .filter((s) => !managingClass.enrolledStudentIds.includes(s.id))
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.namaLengkap} ({s.jenjang} - {s.asalSekolah})
-                        </option>
-                      ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const sel = document.getElementById('select-add-student') as HTMLSelectElement;
-                      if (sel && sel.value) {
-                        enrollStudentInClass(managingClass.id, sel.value);
-                        setManagingClass({
-                          ...managingClass,
-                          enrolledStudentIds: [...managingClass.enrolledStudentIds, sel.value],
-                        });
-                        sel.value = '';
-                      }
-                    }}
-                    className="rb-btn rb-btn-orange rb-btn-sm"
-                  >
-                    <UserPlus size={15} />
-                    <span>Daftarkan</span>
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* List of enrolled students */}
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy-900)', marginBottom: 8 }}>
@@ -559,21 +569,23 @@ export const ClassesView: React.FC = () => {
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            removeStudentFromClass(managingClass.id, sid);
-                            setManagingClass({
-                              ...managingClass,
-                              enrolledStudentIds: managingClass.enrolledStudentIds.filter((id) => id !== sid),
-                            });
-                          }}
-                          className="rb-btn rb-btn-sm rb-btn-danger"
-                          title="Keluarkan dari kelas"
-                        >
-                          <UserMinus size={13} />
-                          <span>Keluarkan</span>
-                        </button>
+                        {canAccess(currentUser?.role, 'classes.manage_students') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              removeStudentFromClass(managingClass.id, sid);
+                              setManagingClass({
+                                ...managingClass,
+                                enrolledStudentIds: managingClass.enrolledStudentIds.filter((id) => id !== sid),
+                              });
+                            }}
+                            className="rb-btn rb-btn-sm rb-btn-danger"
+                            title="Keluarkan dari kelas"
+                          >
+                            <UserMinus size={13} />
+                            <span>Keluarkan</span>
+                          </button>
+                        )}
                       </div>
                     );
                   })}

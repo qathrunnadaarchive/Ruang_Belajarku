@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import { Schedule, DayOfWeek } from '../types';
 import {
   Clock,
@@ -31,6 +32,7 @@ export const SchedulesView: React.FC = () => {
     updateSchedule,
     deleteSchedule,
     globalSearch,
+    currentUser,
   } = useApp();
 
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -219,10 +221,12 @@ export const SchedulesView: React.FC = () => {
             </button>
           </div>
 
-          <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
-            <Plus size={16} />
-            <span>Tambah Sesi Jadwal</span>
-          </button>
+          {canAccess(currentUser?.role, 'schedules.create') && (
+            <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
+              <Plus size={16} />
+              <span>Tambah Sesi Jadwal</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -329,22 +333,26 @@ export const SchedulesView: React.FC = () => {
                           </span>
 
                           <div style={{ display: 'flex', gap: 4 }}>
-                            <button
-                              onClick={() => handleOpenEdit(sch)}
-                              className="rb-btn-icon rb-btn-secondary"
-                              style={{ width: 26, height: 26 }}
-                              title="Edit Jadwal"
-                            >
-                              <Edit2 size={12} color="var(--orange-500)" />
-                            </button>
-                            <button
-                              onClick={() => setDeletingSchedule(sch)}
-                              className="rb-btn-icon rb-btn-danger"
-                              style={{ width: 26, height: 26 }}
-                              title="Hapus Jadwal"
-                            >
-                              <Trash2 size={12} />
-                            </button>
+                            {canAccess(currentUser?.role, 'schedules.edit') && (
+                              <button
+                                onClick={() => handleOpenEdit(sch)}
+                                className="rb-btn-icon rb-btn-secondary"
+                                style={{ width: 26, height: 26 }}
+                                title="Edit Jadwal"
+                              >
+                                <Edit2 size={12} color="var(--orange-500)" />
+                              </button>
+                            )}
+                            {canAccess(currentUser?.role, 'schedules.delete') && (
+                              <button
+                                onClick={() => setDeletingSchedule(sch)}
+                                className="rb-btn-icon rb-btn-danger"
+                                style={{ width: 26, height: 26 }}
+                                title="Hapus Jadwal"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -459,22 +467,26 @@ export const SchedulesView: React.FC = () => {
 
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                        <button
-                          onClick={() => handleOpenEdit(sch)}
-                          className="rb-btn-icon rb-btn-secondary"
-                          style={{ width: 30, height: 30 }}
-                          title="Edit Jadwal"
-                        >
-                          <Edit2 size={13} color="var(--orange-500)" />
-                        </button>
-                        <button
-                          onClick={() => setDeletingSchedule(sch)}
-                          className="rb-btn-icon rb-btn-danger"
-                          style={{ width: 30, height: 30 }}
-                          title="Hapus Jadwal"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        {canAccess(currentUser?.role, 'schedules.edit') && (
+                          <button
+                            onClick={() => handleOpenEdit(sch)}
+                            className="rb-btn-icon rb-btn-secondary"
+                            style={{ width: 30, height: 30 }}
+                            title="Edit Jadwal"
+                          >
+                            <Edit2 size={13} color="var(--orange-500)" />
+                          </button>
+                        )}
+                        {canAccess(currentUser?.role, 'schedules.delete') && (
+                          <button
+                            onClick={() => setDeletingSchedule(sch)}
+                            className="rb-btn-icon rb-btn-danger"
+                            style={{ width: 30, height: 30 }}
+                            title="Hapus Jadwal"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

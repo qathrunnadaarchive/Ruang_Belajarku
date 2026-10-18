@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import { Teacher } from '../types';
 import {
   GraduationCap,
@@ -27,6 +28,7 @@ export const TeachersView: React.FC = () => {
     updateTeacher,
     deleteTeacher,
     globalSearch,
+    currentUser,
   } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -144,10 +146,12 @@ export const TeachersView: React.FC = () => {
           </p>
         </div>
 
-        <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
-          <Plus size={16} />
-          <span>Tambah Pengajar Baru</span>
-        </button>
+        {canAccess(currentUser?.role, 'teachers.create') && (
+          <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
+            <Plus size={16} />
+            <span>Tambah Pengajar Baru</span>
+          </button>
+        )}
       </div>
 
       {/* Filter and Search Bar */}
@@ -229,22 +233,26 @@ export const TeachersView: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: 4 }}>
-                  <button
-                    onClick={() => handleOpenEdit(t)}
-                    className="rb-btn-icon rb-btn-secondary"
-                    style={{ width: 30, height: 30 }}
-                    title="Edit Pengajar"
-                  >
-                    <Edit2 size={14} color="var(--orange-500)" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingTeacher(t)}
-                    className="rb-btn-icon rb-btn-danger"
-                    style={{ width: 30, height: 30 }}
-                    title="Hapus Pengajar"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {canAccess(currentUser?.role, 'teachers.edit') && (
+                    <button
+                      onClick={() => handleOpenEdit(t)}
+                      className="rb-btn-icon rb-btn-secondary"
+                      style={{ width: 30, height: 30 }}
+                      title="Edit Pengajar"
+                    >
+                      <Edit2 size={14} color="var(--orange-500)" />
+                    </button>
+                  )}
+                  {canAccess(currentUser?.role, 'teachers.delete') && (
+                    <button
+                      onClick={() => setDeletingTeacher(t)}
+                      className="rb-btn-icon rb-btn-danger"
+                      style={{ width: 30, height: 30 }}
+                      title="Hapus Pengajar"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
 

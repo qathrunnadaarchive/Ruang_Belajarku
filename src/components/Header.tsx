@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import {
   Menu,
   Search,
@@ -233,113 +234,121 @@ export const Header: React.FC<HeaderProps> = ({
                 animation: 'fadeIn 0.15s ease',
               }}
             >
-              <button
-                onClick={() => {
-                  setShowQuickAddMenu(false);
-                  onOpenQuickAddStudent();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--slate-700)',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <UserPlus size={16} color="var(--navy-700)" />
-                <span>Siswa Baru</span>
-              </button>
+              {canAccess(currentUser?.role, 'students.create') && (
+                <button
+                  onClick={() => {
+                    setShowQuickAddMenu(false);
+                    onOpenQuickAddStudent();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--slate-700)',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <UserPlus size={16} color="var(--navy-700)" />
+                  <span>Siswa Baru</span>
+                </button>
+              )}
 
-              <button
-                onClick={() => {
-                  setShowQuickAddMenu(false);
-                  onOpenQuickAddClass();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--slate-700)',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <BookPlus size={16} color="var(--orange-500)" />
-                <span>Buka Kelas Baru</span>
-              </button>
+              {canAccess(currentUser?.role, 'classes.create') && (
+                <button
+                  onClick={() => {
+                    setShowQuickAddMenu(false);
+                    onOpenQuickAddClass();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--slate-700)',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <BookPlus size={16} color="var(--orange-500)" />
+                  <span>Buka Kelas Baru</span>
+                </button>
+              )}
 
-              <button
-                onClick={() => {
-                  setShowQuickAddMenu(false);
-                  onOpenQuickAddPayment();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--slate-700)',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <CreditCard size={16} color="var(--emerald-600)" />
-                <span>Catat Pembayaran SPP</span>
-              </button>
+              {canAccess(currentUser?.role, 'payments.create') && (
+                <button
+                  onClick={() => {
+                    setShowQuickAddMenu(false);
+                    onOpenQuickAddPayment();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--slate-700)',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <CreditCard size={16} color="var(--emerald-600)" />
+                  <span>Catat Pembayaran SPP</span>
+                </button>
+              )}
 
-              <button
-                onClick={() => {
-                  setShowQuickAddMenu(false);
-                  setActiveTab('attendance');
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--slate-700)',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <CalendarCheck size={16} color="var(--indigo-600)" />
-                <span>Pencatatan Presensi</span>
-              </button>
+              {canAccess(currentUser?.role, 'attendance.record') && (
+                <button
+                  onClick={() => {
+                    setShowQuickAddMenu(false);
+                    setActiveTab('attendance');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--slate-700)',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--slate-100)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <CalendarCheck size={16} color="var(--indigo-600)" />
+                  <span>Pencatatan Presensi</span>
+                </button>
+              )}
             </div>
           )}
         </div>

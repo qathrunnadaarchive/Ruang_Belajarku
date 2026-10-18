@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import { PaymentRecord, PaymentStatus, PaymentType, PaymentMethod } from '../types';
 import {
   CreditCard,
@@ -34,6 +35,7 @@ export const PaymentsView: React.FC = () => {
     updatePayment,
     deletePayment,
     globalSearch,
+    currentUser,
   } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,10 +154,12 @@ export const PaymentsView: React.FC = () => {
           </p>
         </div>
 
-        <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
-          <Plus size={16} />
-          <span>Catat Pembayaran Baru</span>
-        </button>
+        {canAccess(currentUser?.role, 'payments.create') && (
+          <button onClick={handleOpenAdd} className="rb-btn rb-btn-orange">
+            <Plus size={16} />
+            <span>Catat Pembayaran Baru</span>
+          </button>
+        )}
       </div>
 
       {/* Financial Summary Cards */}
@@ -322,22 +326,26 @@ export const PaymentsView: React.FC = () => {
                       >
                         <Printer size={14} color="var(--navy-800)" />
                       </button>
-                      <button
-                        onClick={() => handleOpenEdit(p)}
-                        className="rb-btn-icon rb-btn-secondary"
-                        style={{ width: 32, height: 32 }}
-                        title="Edit Data Pembayaran"
-                      >
-                        <Edit2 size={14} color="var(--orange-500)" />
-                      </button>
-                      <button
-                        onClick={() => setDeletingPayment(p)}
-                        className="rb-btn-icon rb-btn-danger"
-                        style={{ width: 32, height: 32 }}
-                        title="Hapus Pembayaran"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {canAccess(currentUser?.role, 'payments.edit') && (
+                        <button
+                          onClick={() => handleOpenEdit(p)}
+                          className="rb-btn-icon rb-btn-secondary"
+                          style={{ width: 32, height: 32 }}
+                          title="Edit Data Pembayaran"
+                        >
+                          <Edit2 size={14} color="var(--orange-500)" />
+                        </button>
+                      )}
+                      {canAccess(currentUser?.role, 'payments.delete') && (
+                        <button
+                          onClick={() => setDeletingPayment(p)}
+                          className="rb-btn-icon rb-btn-danger"
+                          style={{ width: 32, height: 32 }}
+                          title="Hapus Pembayaran"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

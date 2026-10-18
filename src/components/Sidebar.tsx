@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccessTab } from '../lib/permissions';
 import {
   LayoutDashboard,
   Users,
@@ -215,8 +216,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             Menu Utama
           </div>
 
-          {navItems.map((item) => {
-            const Icon = item.icon;
+          {navItems
+            .filter((item) => canAccessTab(currentUser?.role, item.id))
+            .map((item) => {
+              const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button

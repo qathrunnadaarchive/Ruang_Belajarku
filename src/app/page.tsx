@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccessTab } from '../lib/permissions';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { LoginPage } from '../components/LoginPage';
@@ -18,6 +19,13 @@ export default function Home() {
   const { currentUser, isAuthLoading, activeTab, setActiveTab } = useApp();
 
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
+
+  // Tab guard: jika peran tidak diizinkan mengakses tab ini, redirect ke dashboard
+  useEffect(() => {
+    if (currentUser && !canAccessTab(currentUser.role, activeTab)) {
+      setActiveTab('dashboard');
+    }
+  }, [currentUser, activeTab, setActiveTab]);
 
   // Indikator memuat saat sesi Supabase sedang diverifikasi
   if (isAuthLoading) {
@@ -91,12 +99,12 @@ export default function Home() {
               onOpenAddPayment={() => setActiveTab('payments')}
             />
           )}
-          {activeTab === 'students' && <StudentsView />}
-          {activeTab === 'classes' && <ClassesView />}
-          {activeTab === 'teachers' && <TeachersView />}
-          {activeTab === 'attendance' && <AttendanceView />}
-          {activeTab === 'schedules' && <SchedulesView />}
-          {activeTab === 'payments' && <PaymentsView />}
+          {activeTab === 'students' && canAccessTab(currentUser?.role, 'students') && <StudentsView />}
+          {activeTab === 'classes' && canAccessTab(currentUser?.role, 'classes') && <ClassesView />}
+          {activeTab === 'teachers' && canAccessTab(currentUser?.role, 'teachers') && <TeachersView />}
+          {activeTab === 'attendance' && canAccessTab(currentUser?.role, 'attendance') && <AttendanceView />}
+          {activeTab === 'schedules' && canAccessTab(currentUser?.role, 'schedules') && <SchedulesView />}
+          {activeTab === 'payments' && canAccessTab(currentUser?.role, 'payments') && <PaymentsView />}
         </main>
       </div>
 
