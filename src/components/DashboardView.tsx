@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { canAccess } from '../lib/permissions';
+import { canAccess, canAccessTab } from '../lib/permissions';
 import {
   Users,
   BookOpen,
@@ -167,8 +167,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Siswa */}
         <div
           className="kpi-card kpi-students"
-          onClick={() => setActiveTab('students')}
-          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (canAccessTab(currentUser?.role, 'students')) setActiveTab('students');
+          }}
+          style={{ cursor: canAccessTab(currentUser?.role, 'students') ? 'pointer' : 'default' }}
         >
           <div>
             <div className="kpi-label">Total Siswa Terdaftar</div>
@@ -186,8 +188,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Kelas */}
         <div
           className="kpi-card kpi-classes"
-          onClick={() => setActiveTab('classes')}
-          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (canAccessTab(currentUser?.role, 'classes')) setActiveTab('classes');
+          }}
+          style={{ cursor: canAccessTab(currentUser?.role, 'classes') ? 'pointer' : 'default' }}
         >
           <div>
             <div className="kpi-label">Kelas Belajar Aktif</div>
@@ -204,8 +208,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Pengajar */}
         <div
           className="kpi-card kpi-teachers"
-          onClick={() => setActiveTab('teachers')}
-          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (canAccessTab(currentUser?.role, 'teachers')) setActiveTab('teachers');
+          }}
+          style={{ cursor: canAccessTab(currentUser?.role, 'teachers') ? 'pointer' : 'default' }}
         >
           <div>
             <div className="kpi-label">Tentor & Pengajar</div>
@@ -222,8 +228,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Kehadiran */}
         <div
           className="kpi-card kpi-attendance"
-          onClick={() => setActiveTab('attendance')}
-          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (canAccessTab(currentUser?.role, 'attendance')) setActiveTab('attendance');
+          }}
+          style={{ cursor: canAccessTab(currentUser?.role, 'attendance') ? 'pointer' : 'default' }}
         >
           <div>
             <div className="kpi-label">Tingkat Kehadiran</div>
@@ -269,13 +277,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Clock size={18} color="var(--orange-500)" />
               <span>Jadwal Belajar Hari Ini ({currentDayName})</span>
             </div>
-            <button
-              onClick={() => setActiveTab('schedules')}
-              className="rb-btn rb-btn-secondary rb-btn-sm"
-            >
-              <span>Semua Jadwal</span>
-              <ChevronRight size={14} />
-            </button>
+            {canAccessTab(currentUser?.role, 'schedules') && (
+              <button
+                onClick={() => setActiveTab('schedules')}
+                className="rb-btn rb-btn-secondary rb-btn-sm"
+              >
+                <span>Semua Jadwal</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
           <div className="rb-card-body" style={{ padding: 18 }}>
             {todaySchedules.length === 0 ? (
@@ -329,12 +339,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => setActiveTab('attendance')}
-                      className="rb-btn rb-btn-sm rb-btn-primary"
-                    >
-                      Presensi
-                    </button>
+                    {canAccess(currentUser?.role, 'attendance.record') && (
+                      <button
+                        onClick={() => setActiveTab('attendance')}
+                        className="rb-btn rb-btn-sm rb-btn-primary"
+                      >
+                        Presensi
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

@@ -86,6 +86,7 @@ export const StudentsView: React.FC = () => {
 
   // Open add modal
   const handleOpenAdd = () => {
+    if (!canAccess(currentUser?.role, 'students.create')) return;
     const randomNisn = '00' + Math.floor(10000000 + Math.random() * 90000000);
     setFormData({
       nisn: randomNisn,
@@ -106,6 +107,7 @@ export const StudentsView: React.FC = () => {
 
   // Open edit modal
   const handleOpenEdit = (stu: Student) => {
+    if (!canAccess(currentUser?.role, 'students.edit')) return;
     setEditingStudent(stu);
     setFormData({
       nisn: stu.nisn,
@@ -129,9 +131,11 @@ export const StudentsView: React.FC = () => {
     if (!formData.namaLengkap || !formData.nisn) return;
 
     if (editingStudent) {
+      if (!canAccess(currentUser?.role, 'students.edit')) return;
       updateStudent(editingStudent.id, formData);
       setEditingStudent(null);
     } else {
+      if (!canAccess(currentUser?.role, 'students.create')) return;
       addStudent(formData);
       setIsAddModalOpen(false);
     }
@@ -754,18 +758,20 @@ export const StudentsView: React.FC = () => {
             </div>
 
             <div className="modal-footer">
-              <button
-                type="button"
-                onClick={() => {
-                  const s = viewingStudent;
-                  setViewingStudent(null);
-                  handleOpenEdit(s);
-                }}
-                className="rb-btn rb-btn-secondary"
-              >
-                <Edit2 size={15} />
-                <span>Edit Siswa Ini</span>
-              </button>
+              {canAccess(currentUser?.role, 'students.edit') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const s = viewingStudent;
+                    setViewingStudent(null);
+                    handleOpenEdit(s);
+                  }}
+                  className="rb-btn rb-btn-secondary"
+                >
+                  <Edit2 size={15} />
+                  <span>Edit Siswa Ini</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setViewingStudent(null)}
@@ -810,17 +816,19 @@ export const StudentsView: React.FC = () => {
               >
                 Batal
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteStudent(deletingStudent.id);
-                  setDeletingStudent(null);
-                }}
-                className="rb-btn rb-btn-danger"
-              >
-                <Trash2 size={15} />
-                <span>Hapus Data</span>
-              </button>
+              {canAccess(currentUser?.role, 'students.delete') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteStudent(deletingStudent.id);
+                    setDeletingStudent(null);
+                  }}
+                  className="rb-btn rb-btn-danger"
+                >
+                  <Trash2 size={15} />
+                  <span>Hapus Data</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

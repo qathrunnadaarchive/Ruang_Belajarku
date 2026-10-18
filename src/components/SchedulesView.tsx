@@ -99,6 +99,7 @@ export const SchedulesView: React.FC = () => {
   };
 
   const handleOpenAdd = () => {
+    if (!canAccess(currentUser?.role, 'schedules.create')) return;
     const initialClassId = classes[0]?.id || '';
     const initialTeacherId = classes[0]?.teacherId || teachers[0]?.id || '';
     setFormData({
@@ -115,6 +116,7 @@ export const SchedulesView: React.FC = () => {
   };
 
   const handleOpenEdit = (sch: Schedule) => {
+    if (!canAccess(currentUser?.role, 'schedules.edit')) return;
     setEditingSchedule(sch);
     setFormData({
       classId: sch.classId,
@@ -147,9 +149,11 @@ export const SchedulesView: React.FC = () => {
     }
 
     if (editingSchedule) {
+      if (!canAccess(currentUser?.role, 'schedules.edit')) return;
       updateSchedule(editingSchedule.id, formData);
       setEditingSchedule(null);
     } else {
+      if (!canAccess(currentUser?.role, 'schedules.create')) return;
       addSchedule(formData);
       setIsAddModalOpen(false);
     }
@@ -693,17 +697,19 @@ export const SchedulesView: React.FC = () => {
               >
                 Batal
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteSchedule(deletingSchedule.id);
-                  setDeletingSchedule(null);
-                }}
-                className="rb-btn rb-btn-danger"
-              >
-                <Trash2 size={15} />
-                <span>Hapus Sesi</span>
-              </button>
+              {canAccess(currentUser?.role, 'schedules.delete') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteSchedule(deletingSchedule.id);
+                    setDeletingSchedule(null);
+                  }}
+                  className="rb-btn rb-btn-danger"
+                >
+                  <Trash2 size={15} />
+                  <span>Hapus Sesi</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

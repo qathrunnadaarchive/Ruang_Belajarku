@@ -78,6 +78,7 @@ export const ClassesView: React.FC = () => {
   }, [classes, searchTerm, globalSearch, selectedJenjang, selectedProgram]);
 
   const handleOpenAdd = () => {
+    if (!canAccess(currentUser?.role, 'classes.create')) return;
     setFormData({
       namaKelas: '',
       jenjang: 'SMA',
@@ -92,6 +93,7 @@ export const ClassesView: React.FC = () => {
   };
 
   const handleOpenEdit = (c: ClassItem) => {
+    if (!canAccess(currentUser?.role, 'classes.edit')) return;
     setEditingClass(c);
     setFormData({
       namaKelas: c.namaKelas,
@@ -110,9 +112,11 @@ export const ClassesView: React.FC = () => {
     if (!formData.namaKelas) return;
 
     if (editingClass) {
+      if (!canAccess(currentUser?.role, 'classes.edit')) return;
       updateClass(editingClass.id, formData);
       setEditingClass(null);
     } else {
+      if (!canAccess(currentUser?.role, 'classes.create')) return;
       addClass(formData);
       setIsAddModalOpen(false);
     }
@@ -316,7 +320,11 @@ export const ClassesView: React.FC = () => {
                   className="rb-btn rb-btn-sm rb-btn-primary"
                 >
                   <Users size={14} />
-                  <span>Kelola Siswa ({enrolledCount})</span>
+                  <span>
+                    {canAccess(currentUser?.role, 'classes.manage_students')
+                      ? `Kelola Siswa (${enrolledCount})`
+                      : `Lihat Siswa (${enrolledCount})`}
+                  </span>
                 </button>
               </div>
             </div>
@@ -638,17 +646,19 @@ export const ClassesView: React.FC = () => {
               >
                 Batal
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteClass(deletingClass.id);
-                  setDeletingClass(null);
-                }}
-                className="rb-btn rb-btn-danger"
-              >
-                <Trash2 size={15} />
-                <span>Hapus Kelas</span>
-              </button>
+              {canAccess(currentUser?.role, 'classes.delete') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteClass(deletingClass.id);
+                    setDeletingClass(null);
+                  }}
+                  className="rb-btn rb-btn-danger"
+                >
+                  <Trash2 size={15} />
+                  <span>Hapus Kelas</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

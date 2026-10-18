@@ -25,6 +25,7 @@ import {
   clearSupabaseConfig,
   supabase,
 } from '../lib/supabase';
+import { canAccess } from '../lib/permissions';
 
 export interface ToastMessage {
   id: string;
@@ -524,6 +525,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // STUDENT CRUD (Direct Supabase Sync)
   // ============================================================================
   const addStudent = async (studentData: Omit<Student, 'id'>) => {
+    if (!canAccess(currentUser?.role, 'students.create')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menambah data siswa.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const newId = generateUUID();
 
@@ -569,6 +578,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateStudent = async (id: string, updatedData: Partial<Student>) => {
+    if (!canAccess(currentUser?.role, 'students.edit')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui data siswa.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = students.find((s) => s.id === id);
 
@@ -613,6 +630,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteStudent = async (id: string) => {
+    if (!canAccess(currentUser?.role, 'students.delete')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menghapus data siswa.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = students.find((s) => s.id === id);
 
@@ -649,6 +674,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // TEACHER CRUD (Direct Supabase Sync)
   // ============================================================================
   const addTeacher = async (teacherData: Omit<Teacher, 'id'>) => {
+    if (!canAccess(currentUser?.role, 'teachers.create')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk mendaftarkan pengajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const newId = generateUUID();
 
@@ -690,6 +723,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateTeacher = async (id: string, updatedData: Partial<Teacher>) => {
+    if (!canAccess(currentUser?.role, 'teachers.edit')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui data pengajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = teachers.find((t) => t.id === id);
 
@@ -730,6 +771,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteTeacher = async (id: string) => {
+    if (!canAccess(currentUser?.role, 'teachers.delete')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menghapus pengajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = teachers.find((t) => t.id === id);
 
@@ -765,6 +814,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // CLASSES CRUD (Direct Supabase Sync)
   // ============================================================================
   const addClass = async (clsData: Omit<ClassItem, 'id' | 'enrolledStudentIds'>) => {
+    if (!canAccess(currentUser?.role, 'classes.create')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk membuka kelas bimbingan baru.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const newId = generateUUID();
 
@@ -806,6 +863,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateClass = async (id: string, updatedData: Partial<ClassItem>) => {
+    if (!canAccess(currentUser?.role, 'classes.edit')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui data kelas.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = classes.find((c) => c.id === id);
 
@@ -848,6 +913,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteClass = async (id: string) => {
+    if (!canAccess(currentUser?.role, 'classes.delete')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menghapus kelas bimbingan.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = classes.find((c) => c.id === id);
 
@@ -882,6 +955,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const enrollStudentInClass = async (classId: string, studentId: string) => {
+    if (!canAccess(currentUser?.role, 'classes.manage_students')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk mengelola siswa di kelas.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
 
     if (isUUID(classId) && isUUID(studentId)) {
@@ -912,6 +993,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const removeStudentFromClass = async (classId: string, studentId: string) => {
+    if (!canAccess(currentUser?.role, 'classes.manage_students')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk mengelola siswa di kelas.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
 
     if (isUUID(classId) && isUUID(studentId)) {
@@ -945,6 +1034,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // SCHEDULES CRUD (Direct Supabase Sync)
   // ============================================================================
   const addSchedule = async (schData: Omit<Schedule, 'id'>) => {
+    if (!canAccess(currentUser?.role, 'schedules.create')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menambah sesi jadwal belajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const newId = generateUUID();
 
@@ -985,6 +1082,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateSchedule = async (id: string, schData: Partial<Schedule>) => {
+    if (!canAccess(currentUser?.role, 'schedules.edit')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui sesi jadwal belajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
 
     const updatePayload: any = {};
@@ -1021,6 +1126,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteSchedule = async (id: string) => {
+    if (!canAccess(currentUser?.role, 'schedules.delete')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menghapus sesi jadwal belajar.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     try {
       if (isUUID(id)) {
@@ -1053,6 +1166,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     tanggal: string,
     records: { studentId: string; status: any; catatan?: string }[]
   ) => {
+    if (!canAccess(currentUser?.role, 'attendance.record')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk mencatat presensi kehadiran.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
 
     const validRows = records
@@ -1091,6 +1212,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateAttendance = async (id: string, record: Partial<AttendanceRecord>) => {
+    if (!canAccess(currentUser?.role, 'attendance.record')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui catatan presensi.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
 
     if (isUUID(id)) {
@@ -1123,6 +1252,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // PAYMENTS CRUD (Direct Supabase Sync)
   // ============================================================================
   const addPayment = async (paymentData: Omit<PaymentRecord, 'id' | 'nomorTransaksi' | 'createdAt'>) => {
+    if (!canAccess(currentUser?.role, 'payments.create')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk mencatat pembayaran biaya.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const student = students.find((s) => s.id === paymentData.studentId);
     const now = new Date();
@@ -1171,6 +1308,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updatePayment = async (id: string, paymentData: Partial<PaymentRecord>) => {
+    if (!canAccess(currentUser?.role, 'payments.edit')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk memperbarui catatan pembayaran.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = payments.find((p) => p.id === id);
 
@@ -1230,6 +1375,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deletePayment = async (id: string) => {
+    if (!canAccess(currentUser?.role, 'payments.delete')) {
+      addToast({
+        type: 'error',
+        title: 'Akses Ditolak',
+        message: 'Peran Anda tidak memiliki izin untuk menghapus catatan pembayaran.',
+      });
+      return;
+    }
     const client = getSupabaseClient();
     const target = payments.find((p) => p.id === id);
 

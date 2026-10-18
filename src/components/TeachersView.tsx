@@ -72,6 +72,7 @@ export const TeachersView: React.FC = () => {
   }, [teachers, searchTerm, globalSearch, selectedStatus]);
 
   const handleOpenAdd = () => {
+    if (!canAccess(currentUser?.role, 'teachers.create')) return;
     const randomNip = 'TCH-2026-' + String(teachers.length + 1).padStart(3, '0');
     setFormData({
       nip: randomNip,
@@ -88,6 +89,7 @@ export const TeachersView: React.FC = () => {
   };
 
   const handleOpenEdit = (t: Teacher) => {
+    if (!canAccess(currentUser?.role, 'teachers.edit')) return;
     setEditingTeacher(t);
     setFormData({
       nip: t.nip,
@@ -107,9 +109,11 @@ export const TeachersView: React.FC = () => {
     if (!formData.namaLengkap || !formData.nip) return;
 
     if (editingTeacher) {
+      if (!canAccess(currentUser?.role, 'teachers.edit')) return;
       updateTeacher(editingTeacher.id, formData);
       setEditingTeacher(null);
     } else {
+      if (!canAccess(currentUser?.role, 'teachers.create')) return;
       addTeacher(formData);
       setIsAddModalOpen(false);
     }
@@ -559,17 +563,19 @@ export const TeachersView: React.FC = () => {
               >
                 Batal
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteTeacher(deletingTeacher.id);
-                  setDeletingTeacher(null);
-                }}
-                className="rb-btn rb-btn-danger"
-              >
-                <Trash2 size={15} />
-                <span>Hapus Pengajar</span>
-              </button>
+              {canAccess(currentUser?.role, 'teachers.delete') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteTeacher(deletingTeacher.id);
+                    setDeletingTeacher(null);
+                  }}
+                  className="rb-btn rb-btn-danger"
+                >
+                  <Trash2 size={15} />
+                  <span>Hapus Pengajar</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -93,6 +93,7 @@ export const PaymentsView: React.FC = () => {
   const pendingCount = payments.filter((p) => p.status === 'Menunggu Konfirmasi').length;
 
   const handleOpenAdd = () => {
+    if (!canAccess(currentUser?.role, 'payments.create')) return;
     const defaultStudent = students[0];
     setFormData({
       studentId: defaultStudent?.id || '',
@@ -109,6 +110,7 @@ export const PaymentsView: React.FC = () => {
   };
 
   const handleOpenEdit = (p: PaymentRecord) => {
+    if (!canAccess(currentUser?.role, 'payments.edit')) return;
     setEditingPayment(p);
     setFormData({
       studentId: p.studentId,
@@ -128,9 +130,11 @@ export const PaymentsView: React.FC = () => {
     if (!formData.studentId) return;
 
     if (editingPayment) {
+      if (!canAccess(currentUser?.role, 'payments.edit')) return;
       updatePayment(editingPayment.id, formData);
       setEditingPayment(null);
     } else {
+      if (!canAccess(currentUser?.role, 'payments.create')) return;
       addPayment(formData);
       setIsAddModalOpen(false);
     }
@@ -726,17 +730,19 @@ export const PaymentsView: React.FC = () => {
               >
                 Batal
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deletePayment(deletingPayment.id);
-                  setDeletingPayment(null);
-                }}
-                className="rb-btn rb-btn-danger"
-              >
-                <Trash2 size={15} />
-                <span>Hapus Transaksi</span>
-              </button>
+              {canAccess(currentUser?.role, 'payments.delete') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deletePayment(deletingPayment.id);
+                    setDeletingPayment(null);
+                  }}
+                  className="rb-btn rb-btn-danger"
+                >
+                  <Trash2 size={15} />
+                  <span>Hapus Transaksi</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

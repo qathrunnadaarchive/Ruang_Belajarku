@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { canAccess } from '../lib/permissions';
 import { AttendanceStatus } from '../types';
 import {
   CalendarCheck,
@@ -25,6 +26,7 @@ export const AttendanceView: React.FC = () => {
     attendances,
     saveAttendanceBatch,
     globalSearch,
+    currentUser,
   } = useApp();
 
   const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
@@ -84,6 +86,7 @@ export const AttendanceView: React.FC = () => {
   };
 
   const markAllHadir = () => {
+    if (!canAccess(currentUser?.role, 'attendance.record')) return;
     setStatusMap((prev) => {
       const updated = { ...prev };
       Object.keys(updated).forEach((sid) => {
@@ -94,6 +97,7 @@ export const AttendanceView: React.FC = () => {
   };
 
   const handleSaveAttendance = () => {
+    if (!canAccess(currentUser?.role, 'attendance.record')) return;
     const records = Object.entries(statusMap).map(([studentId, data]) => ({
       studentId,
       status: data.status,
@@ -123,14 +127,16 @@ export const AttendanceView: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleSaveAttendance}
-          className="rb-btn rb-btn-orange"
-          disabled={enrolledStudentIds.length === 0}
-        >
-          <Save size={16} />
-          <span>Simpan Presensi Kelas</span>
-        </button>
+        {canAccess(currentUser?.role, 'attendance.record') && (
+          <button
+            onClick={handleSaveAttendance}
+            className="rb-btn rb-btn-orange"
+            disabled={enrolledStudentIds.length === 0}
+          >
+            <Save size={16} />
+            <span>Simpan Presensi Kelas</span>
+          </button>
+        )}
       </div>
 
       {/* Class and Date Selector Bar */}
@@ -172,17 +178,19 @@ export const AttendanceView: React.FC = () => {
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', paddingBottom: 2 }}>
-          <button
-            type="button"
-            onClick={markAllHadir}
-            className="rb-btn rb-btn-secondary"
-            style={{ width: '100%' }}
-          >
-            <CheckCircle2 size={16} color="var(--emerald-600)" />
-            <span>Tandai Semua Hadir</span>
-          </button>
-        </div>
+        {canAccess(currentUser?.role, 'attendance.record') && (
+          <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', paddingBottom: 2 }}>
+            <button
+              type="button"
+              onClick={markAllHadir}
+              className="rb-btn rb-btn-secondary"
+              style={{ width: '100%' }}
+            >
+              <CheckCircle2 size={16} color="var(--emerald-600)" />
+              <span>Tandai Semua Hadir</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Summary Stat Pills */}

@@ -203,20 +203,24 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Quick Action Dropdown */}
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setShowQuickAddMenu(!showQuickAddMenu)}
-            className="rb-btn rb-btn-orange"
-            style={{
-              padding: '8px 14px',
-              fontSize: 13,
-              borderRadius: 'var(--radius-full)',
-            }}
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>Tambah</span>
-            <ChevronDown size={14} />
-          </button>
+        {(canAccess(currentUser?.role, 'students.create') ||
+          canAccess(currentUser?.role, 'classes.create') ||
+          canAccess(currentUser?.role, 'payments.create') ||
+          canAccess(currentUser?.role, 'attendance.record')) && (
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowQuickAddMenu(!showQuickAddMenu)}
+              className="rb-btn rb-btn-orange"
+              style={{
+                padding: '8px 14px',
+                fontSize: 13,
+                borderRadius: 'var(--radius-full)',
+              }}
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>Tambah</span>
+              <ChevronDown size={14} />
+            </button>
 
           {showQuickAddMenu && (
             <div
@@ -352,6 +356,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
         </div>
+        )}
 
         {/* Notifications */}
         <div style={{ position: 'relative' }}>
@@ -362,7 +367,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Pemberitahuan"
           >
             <Bell size={18} />
-            {pendingPayments.length > 0 && (
+            {canAccess(currentUser?.role, 'payments.view_revenue') && pendingPayments.length > 0 && (
               <span
                 style={{
                   position: 'absolute',
@@ -407,12 +412,14 @@ export const Header: React.FC<HeaderProps> = ({
                 <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--navy-900)' }}>
                   Pemberitahuan
                 </span>
-                <span style={{ fontSize: 11, color: 'var(--slate-500)' }}>
-                  {pendingPayments.length} tagihan aktif
-                </span>
+                {canAccess(currentUser?.role, 'payments.view_revenue') && (
+                  <span style={{ fontSize: 11, color: 'var(--slate-500)' }}>
+                    {pendingPayments.length} tagihan aktif
+                  </span>
+                )}
               </div>
 
-              {pendingPayments.length === 0 ? (
+              {!canAccess(currentUser?.role, 'payments.view_revenue') || pendingPayments.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '16px 8px', color: 'var(--slate-500)', fontSize: 12.5 }}>
                   Tidak ada pemberitahuan baru. Semua beres!
                 </div>
