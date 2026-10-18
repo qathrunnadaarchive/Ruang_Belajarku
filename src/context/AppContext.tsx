@@ -397,38 +397,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const client = getSupabaseClient();
     try {
       const { data, error } = await client.auth.signInWithPassword({ email, password });
-      if (error) {
-        // Fallback for demo users
-        const demo = DEMO_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-        if (demo) {
-          setCurrentUser(demo);
-          localStorage.setItem('rb_user', JSON.stringify(demo));
-          addToast({
-            type: 'success',
-            title: 'Login Berhasil (Demo Mode)',
-            message: `Selamat datang kembali, ${demo.fullName}`,
-          });
-          return { success: true };
-        }
-        return { success: false, error: error.message };
-      }
-      if (data?.user) {
-        const userObj: UserProfile = {
-          id: data.user.id,
-          email: data.user.email || email,
-          fullName: data.user.user_metadata?.full_name || email.split('@')[0],
-          role: (data.user.user_metadata?.role as any) || 'admin',
+      if (error || !data?.user) {
+        return {
+          success: false,
+          error: error?.message || 'Login gagal. Pengguna tidak ditemukan.',
         };
-        setCurrentUser(userObj);
-        localStorage.setItem('rb_user', JSON.stringify(userObj));
-        addToast({
-          type: 'success',
-          title: 'Supabase Auth Berhasil',
-          message: `Terautentikasi sebagai ${userObj.fullName}`,
-        });
-        return { success: true };
       }
-      return { success: false, error: 'User tidak ditemukan' };
+
+      const { data: profile, error: profileError } = await client
+        .from('profiles')
+        .select('full_name, role')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      if (profileError || !profile || !profile.role) {
+        await client.auth.signOut().catch(() => {});
+        const errorMessage = profileError
+          ? `Gagal memuat profil: ${profileError.message}`
+          : 'Profil akun atau role tidak ditemukan di sistem. Silakan hubungi administrator.';
+
+        addToast({
+          type: 'error',
+          title: 'Login Gagal',
+          message: errorMessage,
+        });
+
+        return { success: false, error: errorMessage };
+      }
+
+      const userObj: UserProfile = {
+        id: data.user.id,
+        email: data.user.email || email,
+        fullName: profile.full_name || email.split('@')[0],
+        role: profile.role as 'admin' | 'pengajar' | 'keuangan',
+      };
+      setCurrentUser(userObj);
+      localStorage.setItem('rb_user', JSON.stringify(userObj));
+      addToast({
+        type: 'success',
+        title: 'Login Berhasil',
+        message: `Selamat datang kembali, ${userObj.fullName}`,
+      });
+      return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || 'Gagal login ke Supabase' };
     }
