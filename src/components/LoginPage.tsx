@@ -198,7 +198,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
           }}
         >
           <span>© 2026 Ruang Belajarku. Seluruh hak cipta dilindungi.</span>
-          <span style={{ color: '#94a3b8' }}>Versi 2.4 - Production Ready</span>
+          <span style={{ color: '#94a3b8' }}>Sistem Manajemen Bimbingan Belajar</span>
         </div>
       </div>
 
@@ -222,7 +222,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onOpenSupabaseModal }) => 
               Masuk ke Dashboard
             </h2>
             <p style={{ fontSize: 13.5, color: '#94a3b8', marginTop: 6 }}>
-              Gunakan akun terdaftar atau pilih salah satu akun demo untuk langsung mencoba sistem.
+              Masuk menggunakan email dan kata sandi akun Anda.
             </p>
           </div>
 
